@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yomak-App</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'>
+  <rect width='128' height='128' rx='20' fill='%23ffffff'/>
+  <path d='M32 40h64M32 64h64M32 88h64' stroke='%23000000' stroke-width='8' stroke-linecap='round'/>
+  <path d='M48 36l-8 8-4-4' stroke='%2300b894' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/>
+  <path d='M48 60l-8 8-4-4' stroke='%2300b894' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/>
+  <path d='M48 84l-8 8-4-4' stroke='%2300b894' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/>
+</svg>">
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    :root{
+      --bg-dark:#0b1020; --bg-soft-dark:#0f1530; --card-dark:#111a3a; --text-dark:#e8eeff;
+      --bg-light:#f4f7ff; --card-light:#fff; --text-light:#0e152b;
+      --muted:#9aa7c7; --primary:#6aa8ff; --primary-2:#9b6bff; --accent:#27e1a9;
+      --danger:#ff6b6b; --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.25); --ff:'Cairo', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      --touch:48px; /* recommended touch target */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:var(--ff);background:radial-gradient(1200px 800px at 80% -10%, rgba(155,107,255,.12), transparent),radial-gradient(900px 700px at -10% 120%, rgba(39,225,169,.08), transparent),var(--bg-dark);color:var(--text-dark);transition:background .3s,color .3s}
+    body.light{background:var(--bg-light); color:var(--text-light)}
+    a{color:inherit;text-decoration:none}
+
+    /* header */
+    header{position:sticky;top:0;z-index:60;background:linear-gradient(180deg, rgba(11,16,32,.85), rgba(11,16,32,.35));backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,.04)}
+    body.light header{background:#fff;border-color:#eef3ff}
+    .container{max-width:1100px;margin-inline:auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:grid;place-items:center;color:#fff}
+    h1{font-size:16px;margin:0}
+
+    /* main layout */
+    main{padding:16px; padding-bottom:110px}
+
+    /* cards grid */
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+    .card{background:var(--card-dark);border-radius:12px;padding:14px;box-shadow:var(--shadow);min-height:120px;display:flex;flex-direction:column;justify-content:space-between}
+    body.light .card{background:var(--card-light)}
+    .card h3{margin:0 0 6px}
+    .card p{margin:0;color:var(--muted);font-size:13px}
+
+    /* responsive table wrapper */
+    .table-wrap{overflow:auto;border-radius:12px}
+    table{width:100%;border-collapse:collapse;min-width:800px}
+    th,td{padding:10px 12px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04)}
+    th{color:#cfe6ff;text-align:right}
+    body.light th{color:#37506a}
+
+    /* buttons and touch targets */
+    .btn{background:rgba(255,255,255,.04);border:0;padding:8px 10px;border-radius:10px;color:inherit;cursor:pointer;font-size:14px}
+    body.light .btn{background:#f4f7ff}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff}
+
+    /* floating action button with quick menu */
+    .fab{position:fixed;right:18px;bottom:82px;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;z-index:80;box-shadow:var(--shadow)}
+    .fab-menu{position:fixed;right:18px;bottom:150px;display:flex;flex-direction:column;gap:10px;z-index:79;align-items:flex-end}
+    .fab-menu .fab-mini{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--card-dark);color:var(--text-dark);box-shadow:var(--shadow)}
+    body.light .fab-menu .fab-mini{background:#fff}
+
+    /* bottom navigation for mobile */
+    .bottom-nav{position:fixed;left:12px;right:12px;bottom:12px;height:64px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));display:flex;align-items:center;justify-content:space-around;gap:6px;box-shadow:var(--shadow);z-index:70}
+    body.light .bottom-nav{background:#fff}
+    .bottom-nav button{background:transparent;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;font-size:12px}
+    .bottom-nav button.active{color:var(--primary)}
+
+    /* modal styles */
+    .modal-backdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,.5);z-index:100}
+    .modal{width:min(720px,100%);background:var(--card-dark);border-radius:12px;padding:14px}
+    body.light .modal{background:#fff}
+    .modal header{display:flex;align-items:center;justify-content:space-between}
+    .modal form{display:grid;gap:10px}
+    .modal input,.modal textarea,.modal select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);color:inherit}
+    body.light .modal input{background:#fff;border-color:#eef3ff}
+
+    /* notification toast (in-page) */
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:160px;background:rgba(0,0,0,.8);color:#fff;padding:10px 14px;border-radius:10px;z-index:120}
+
+    /* small screen tweaks */
+    @media(max-width:520px){ .container{padding:10px} .fab{right:12px;bottom:86px} .fab-menu{right:12px} .card{padding:12px} table{min-width:700px} }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="brand"><div class="logo"><i class="fa-solid fa-check-double"></i></div><h1>منظم المهام</h1></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="btnNotifRequest" class="btn" title="طلب إذن الإشعارات"><i class="fa-regular fa-bell"></i></button>
+        <button id="toggleTheme" class="btn"><i class="fa-solid fa-moon"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid">
+      <div class="card">
+        <div>
+          <h3>المهام</h3>
+          <p>أضف مهامك وتابع تقدمها بسرعة.</p>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-start">
+          <button class="btn btn-primary" id="openTaskModal">إضافة مهمة</button>
+          <button class="btn" id="gotoTasks">عرض المهام</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <h3>الروتين</h3>
+          <p>كوّن روتينك اليومي وكروت تفاعلية.</p>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-start">
+          <button class="btn btn-primary" id="openRoutineModal">روتين جديد</button>
+          <button class="btn" id="gotoRoutines">عرض الروتينات</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <h3>التذكيرات</h3>
+          <p>أنشئ تذكيرات مع صوت وتنبيهات قبل الحدث.</p>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-start">
+          <button class="btn btn-primary" id="openReminderModal">تذكير جديد</button>
+          <button class="btn" id="gotoReminders">عرض التذكيرات</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tasks Table -->
+    <section id="viewTasks" style="margin-top:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3>قائمة المهام</h3>
+        <div style="display:flex;gap:8px">
+          <input id="search" placeholder="ابحث" style="padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.05);background:rgba(255,255,255,.02)">
+          <button id="btnAddTaskTop" class="btn btn-primary">إضافة</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table id="tasksTable"><thead><tr><th>المهمة</th><th>بداية</th><th>انتهاء</th><th>تقدم</th><th>حالة</th><th>إجراءات</th></tr></thead><tbody id="tasksRows"></tbody></table></div>
+    </section>
+
+    <!-- Routines list -->
+    <section id="viewRoutines" style="margin-top:18px;display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3>الروتينات</h3>
+        <div style="display:flex;gap:8px">
+          <button id="btnAddRoutineTop" class="btn btn-primary">روتين جديد</button>
+        </div>
+      </div>
+      <div id="routinesContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px"></div>
+    </section>
+
+    <!-- Reminders list -->
+    <section id="viewReminders" style="margin-top:18px;display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3>التذكيرات</h3>
+        <div style="display:flex;gap:8px">
+          <button id="btnAddReminderTop" class="btn btn-primary">تذكير جديد</button>
+        </div>
+      </div>
+      <div id="remindersContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px"></div>
+    </section>
+
+  </main>
+
+  <!-- FAB and quick menu -->
+  <div class="fab-menu hidden" id="fabMenu">
+    <button class="fab-mini" id="fabReminder" title="إضافة تذكير"><i class="fa-regular fa-bell"></i></button>
+    <button class="fab-mini" id="fabRoutine" title="إضافة روتين"><i class="fa-solid fa-ranking-star"></i></button>
+    <button class="fab-mini" id="fabTask" title="إضافة مهمة"><i class="fa-solid fa-list-check"></i></button>
+  </div>
+  <button class="fab" id="mainFab"><i class="fa-solid fa-plus"></i></button>
+
+  <!-- Bottom nav -->
+  <nav class="bottom-nav" aria-hidden="false">
+    <button data-view="home" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
+    <button data-view="tasks"><i class="fa-solid fa-list-check"></i><span>المهام</span></button>
+    <button data-view="routines"><i class="fa-solid fa-ranking-star"></i><span>الروتين</span></button>
+    <button data-view="reminders"><i class="fa-regular fa-bell"></i><span>التذكيرات</span></button>
+    <button data-view="settings"><i class="fa-solid fa-gear"></i><span>الإعدادات</span></button>
+  </nav>
+
+  <!-- Modals (task/routine/reminder) -->
+  <div class="modal-backdrop" id="modalTask"><div class="modal"><header><strong id="taskTitle">مهمة جديدة</strong><button class="btn" id="closeTaskModal">إغلاق</button></header><form id="fTask"><input name="title" placeholder="اسم المهمة" required><div style="display:flex;gap:8px"><input name="start" type="date" required><input name="due" type="date" required></div><input name="progress" type="number" min="0" max="100" value="0"><textarea name="desc" rows="3" placeholder="الوصف"></textarea><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" type="button" id="cancelTask">إلغاء</button><button class="btn btn-primary" type="submit">حفظ</button></div></form></div></div>
+
+  <div class="modal-backdrop" id="modalRoutine"><div class="modal"><header><strong id="routineTitle">روتين جديد</strong><button class="btn" id="closeRoutineModal">إغلاق</button></header><form id="fRoutine"><input name="name" placeholder="اسم الروتين" required><input name="start" type="date" required><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" type="button" id="cancelRoutine">إلغاء</button><button class="btn btn-primary" type="submit">حفظ</button></div></form></div></div>
+
+  <div class="modal-backdrop" id="modalReminder"><div class="modal"><header><strong id="remTitle">تذكير جديد</strong><button class="btn" id="closeReminderModal">إغلاق</button></header><form id="fRem"><input name="title" placeholder="اسم التذكير" required><input name="datetime" type="datetime-local" required><select name="repeat"><option value="none">بدون</option><option value="daily">يومي</option><option value="weekly">أسبوعي</option><option value="monthly">شهري</option></select><div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn" type="button" id="cancelRem">إلغاء</button><button class="btn btn-primary" type="submit">حفظ</button></div></form></div></div>
+
+  <!-- in-page toast container -->
+  <div id="toastContainer"></div>
+
+  <script>
+    /* ======= State & Storage keys ======= */
+    const TASKS_KEY = 'todo.tasks.v2';
+    const ROUTINES_KEY = 'todo.routines.v2';
+    const REM_KEY = 'todo.reminders.v2';
+    let tasks = JSON.parse(localStorage.getItem(TASKS_KEY) || '[]');
+    let routines = JSON.parse(localStorage.getItem(ROUTINES_KEY) || '[]');
+    let reminders = JSON.parse(localStorage.getItem(REM_KEY) || '[]');
+
+    /* ======= UI helpers ======= */
+    const qs = s=> document.querySelector(s);
+    const qsa = s=> Array.from(document.querySelectorAll(s));
+    function showToast(text, timeout=3500){ const t = document.createElement('div'); t.className='toast'; t.textContent = text; document.body.appendChild(t); setTimeout(()=> t.remove(), timeout); }
+
+    /* ======= Navigation (bottom nav + sections) ======= */
+    const viewTasks = qs('#viewTasks'), viewRoutines = qs('#viewRoutines'), viewReminders = qs('#viewReminders');
+    function setView(name){ qsa('.bottom-nav button').forEach(b=> b.classList.toggle('active', b.dataset.view===name)); viewTasks.style.display = name==='tasks' ? '' : 'none'; viewRoutines.style.display = name==='routines' ? '' : 'none'; viewReminders.style.display = name==='reminders' ? '' : 'none'; window.scrollTo({top:0, behavior:'smooth'}); }
+    qsa('.bottom-nav button').forEach(b=> b.addEventListener('click', ()=> setView(b.dataset.view)));
+
+    // top quick nav buttons
+    qs('#gotoTasks').addEventListener('click', ()=> setView('tasks'));
+    qs('#gotoRoutines').addEventListener('click', ()=> setView('routines'));
+    qs('#gotoReminders').addEventListener('click', ()=> setView('reminders'));
+
+    /* ======= FAB menu ======= */
+    const mainFab = qs('#mainFab'), fabMenu = qs('#fabMenu');
+    mainFab.addEventListener('click', ()=>{ fabMenu.classList.toggle('hidden'); mainFab.classList.toggle('open'); });
+    qs('#fabTask').addEventListener('click', ()=>{ openTaskModal(); fabMenu.classList.add('hidden'); setView('tasks'); });
+    qs('#fabRoutine').addEventListener('click', ()=>{ openRoutineModal(); fabMenu.classList.add('hidden'); setView('routines'); });
+    qs('#fabReminder').addEventListener('click', ()=>{ openReminderModal(); fabMenu.classList.add('hidden'); setView('reminders'); });
+
+    /* ======= Theme & notif request ======= */
+    const toggleTheme = qs('#toggleTheme'); toggleTheme.addEventListener('click', ()=>{ document.body.classList.toggle('light'); toggleTheme.innerHTML = document.body.classList.contains('light')? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>'; });
+    qs('#btnNotifRequest').addEventListener('click', ()=> requestNotificationPermission().then(g=> showToast(g? 'الإشعارات مفعلة':'الإشعارات مرفوضة')));
+
+    /* ======= Tasks render & CRUD ======= */
+    const tasksRows = qs('#tasksRows');
+    function renderTasks(){ tasksRows.innerHTML=''; if(!tasks.length){ tasksRows.innerHTML = `<tr><td colspan=6 style="text-align:center;padding:18px;color:var(--muted)">لا توجد مهام</td></tr>`; return; } tasks.forEach(t=>{ const tr = document.createElement('tr'); tr.innerHTML = `<td>${escape(t.title)}</td><td>${t.start}</td><td>${t.due}</td><td>${t.progress}%</td><td>${t.progress>=100? 'مكتملة' : (new Date(t.due) < new Date() ? 'متأخرة' : 'قيد التنفيذ')}</td><td><button data-id="${t.id}" class="btn edit">تعديل</button><button data-id="${t.id}" class="btn del">حذف</button></td>`; tasksRows.appendChild(tr); }); }
+
+    function saveAll(){ localStorage.setItem(TASKS_KEY, JSON.stringify(tasks)); localStorage.setItem(ROUTINES_KEY, JSON.stringify(routines)); localStorage.setItem(REM_KEY, JSON.stringify(reminders)); }
+    function escape(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    // attach delegation
+    tasksRows.addEventListener('click', (e)=>{ const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id; if(btn.classList.contains('edit')){ const t = tasks.find(x=> x.id===id); if(t) openTaskModal(t); } if(btn.classList.contains('del')){ if(confirm('حذف المهمة؟')){ tasks = tasks.filter(x=> x.id!==id); saveAll(); renderTasks(); showToast('تم حذف المهمة'); } } });
+
+    // task modal
+    const modalTask = qs('#modalTask'), fTask = qs('#fTask'); function openTaskModal(task=null){ modalTask.style.display='flex'; qs('#taskTitle').textContent = task? 'تعديل مهمة':'مهمة جديدة'; if(task){ fTask.title.value = task.title; fTask.start.value = task.start; fTask.due.value = task.due; fTask.progress.value = task.progress; fTask.desc.value = task.desc; fTask.dataset.editId = task.id; } else { fTask.reset(); delete fTask.dataset.editId; fTask.start.value = new Date().toISOString().slice(0,10); fTask.due.value = new Date().toISOString().slice(0,10); } }
+    function closeTaskModal(){ modalTask.style.display='none'; delete fTask.dataset.editId; }
+    qs('#closeTaskModal').addEventListener('click', closeTaskModal); qs('#cancelTask').addEventListener('click', closeTaskModal);
+    fTask.addEventListener('submit', (e)=>{ e.preventDefault(); const form = new FormData(fTask); const obj = { id: fTask.dataset.editId || uid(), title: form.get('title'), start: form.get('start'), due: form.get('due'), progress: Number(form.get('progress')||0), desc: form.get('desc') }; if(fTask.dataset.editId){ tasks = tasks.map(t=> t.id===obj.id? obj : t); showToast('تم تحديث المهمة'); } else { tasks.unshift(obj); showToast('تم إضافة المهمة'); } saveAll(); renderTasks(); closeTaskModal(); });
+
+    qs('#openTaskModal').addEventListener('click', ()=> openTaskModal()); qs('#btnAddTaskTop').addEventListener('click', ()=> openTaskModal()); qs('#gotoTasks').addEventListener('click', ()=> setView('tasks'));
+
+    /* ======= Routines CRUD & UI ======= */
+    const rc = qs('#routinesContainer'); function renderRoutines(){ rc.innerHTML=''; if(!routines.length){ rc.innerHTML = '<div style="padding:12px;background:rgba(255,255,255,.02);border-radius:8px;color:var(--muted)">لا توجد روتينات</div>'; return; } routines.forEach(r=>{ const el = document.createElement('div'); el.className='card'; el.innerHTML = `<div><strong>${escape(r.name)}</strong><div style="color:var(--muted);font-size:13px">يبدأ: ${r.start} • عناصر: ${r.items?.length||0}</div></div><div style="display:flex;gap:8px"><button data-id="${r.id}" class="btn openRoutine">عرض</button><button data-id="${r.id}" class="btn delRoutine" style="background:#2a2545">حذف</button></div>`; rc.appendChild(el); }); }
+    qs('#btnAddRoutineTop').addEventListener('click', ()=> openRoutineModal()); qs('#openRoutineModal').addEventListener('click', ()=> openRoutineModal()); qs('#gotoRoutines').addEventListener('click', ()=> setView('routines'));
+    const modalRoutine = qs('#modalRoutine'), fRoutine = qs('#fRoutine'); function openRoutineModal(r=null){ modalRoutine.style.display='flex'; qs('#routineTitle').textContent = r? 'تعديل روتين':'روتين جديد'; if(r){ fRoutine.name.value = r.name; fRoutine.start.value = r.start; fRoutine.dataset.editId = r.id; } else { fRoutine.reset(); delete fRoutine.dataset.editId; fRoutine.start.value = new Date().toISOString().slice(0,10); } }
+    function closeRoutineModal(){ modalRoutine.style.display='none'; delete fRoutine.dataset.editId; }
+    qs('#closeRoutineModal').addEventListener('click', closeRoutineModal); qs('#cancelRoutine').addEventListener('click', closeRoutineModal);
+    fRoutine.addEventListener('submit', (e)=>{ e.preventDefault(); const d = new FormData(fRoutine); const obj = { id: fRoutine.dataset.editId || uid(), name: d.get('name'), start: d.get('start'), items: (routines.find(r=> r.id===fRoutine.dataset.editId)?.items) || [] }; if(fRoutine.dataset.editId){ routines = routines.map(r=> r.id===obj.id? {...r, name: obj.name, start: obj.start} : r); showToast('تم تعديل الروتين'); } else { routines.unshift(obj); showToast('تم إضافة روتين'); } saveAll(); renderRoutines(); closeRoutineModal(); });
+    rc.addEventListener('click', (e)=>{ const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id; if(btn.classList.contains('openRoutine')){ openRoutineDetails(id); } if(btn.classList.contains('delRoutine')){ if(confirm('حذف الروتين؟')){ routines = routines.filter(r=> r.id!==id); saveAll(); renderRoutines(); showToast('تم حذف الروتين'); } } });
+
+    /* routine details simple inline (prompt) */
+    function openRoutineDetails(id){ const r = routines.find(x=> x.id===id); if(!r) return; const add = confirm(`روتين: ${r.name}
+عدد العناصر: ${r.items?.length||0}
+اضغط موافق لإضافة عنصر جديد أو إلغاء للعودة`); if(add){ const title = prompt('اسم العنصر'); if(title){ r.items = r.items || []; r.items.push({ id: uid(), title, time: '' }); saveAll(); renderRoutines(); showToast('تم إضافة عنصر'); } } }
+
+    /* ======= Reminders CRUD, scheduling & sound ======= */
+    const rcRem = qs('#remindersContainer'); function renderRems(){ rcRem.innerHTML=''; if(!reminders.length){ rcRem.innerHTML = '<div style="padding:12px;background:rgba(255,255,255,.02);border-radius:8px;color:var(--muted)">لا توجد تذكيرات</div>'; return; } reminders.forEach(r=>{ const el = document.createElement('div'); el.className='card'; el.innerHTML = `<div><strong>${escape(r.title)}</strong><div style="color:var(--muted);font-size:13px">${new Date(r.datetime).toLocaleString()} • ${r.repeat}</div></div><div style="display:flex;gap:8px"><button data-id="${r.id}" class="btn editRem">تعديل</button><button data-id="${r.id}" class="btn delRem" style="background:#2a2545">حذف</button></div>`; rcRem.appendChild(el); }); }
+
+    qs('#openReminderModal').addEventListener('click', ()=> openReminderModal()); qs('#btnAddReminderTop').addEventListener('click', ()=> openReminderModal()); qs('#gotoReminders').addEventListener('click', ()=> setView('reminders'));
+    const modalRem = qs('#modalReminder'), fRem = qs('#fRem'); function openReminderModal(rem=null){ modalRem.style.display='flex'; qs('#remTitle').textContent = rem? 'تعديل تذكير':'تذكير جديد'; if(rem){ fRem.title.value = rem.title; fRem.datetime.value = new Date(rem.datetime).toISOString().slice(0,16); fRem.repeat.value = rem.repeat; fRem.dataset.editId = rem.id; } else { fRem.reset(); delete fRem.dataset.editId; fRem.datetime.value = new Date().toISOString().slice(0,16); } }
+    function closeReminderModal(){ modalRem.style.display='none'; delete fRem.dataset.editId; }
+    qs('#closeReminderModal').addEventListener('click', closeReminderModal); qs('#cancelRem').addEventListener('click', closeReminderModal);
+
+    fRem.addEventListener('submit', (e)=>{ e.preventDefault(); const d = new FormData(fRem); const obj = { id: fRem.dataset.editId || uid(), title: d.get('title'), datetime: new Date(d.get('datetime')).toISOString(), repeat: d.get('repeat') || 'none' }; if(fRem.dataset.editId){ reminders = reminders.map(r=> r.id===obj.id? obj : r); showToast('تم تعديل التذكير'); } else { reminders.push(obj); showToast('تم إضافة التذكير'); } saveAll(); renderRems(); scheduleAllReminders(); closeReminderModal(); });
+
+    rcRem.addEventListener('click', (e)=>{ const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id; if(btn.classList.contains('editRem')){ const r = reminders.find(x=> x.id===id); if(r) openReminderModal(r); } if(btn.classList.contains('delRem')){ if(confirm('حذف التذكير؟')){ reminders = reminders.filter(x=> x.id!==id); saveAll(); renderRems(); scheduleAllReminders(); showToast('تم حذف التذكير'); } } });
+
+    // scheduling helpers
+    let timers = [];
+    function clearTimers(){ timers.forEach(t=> clearTimeout(t)); timers = []; }
+
+    // sound via WebAudio (short beep) to avoid external file
+    const audioCtx = ('AudioContext' in window) ? new AudioContext() : null;
+    function playBeep(){ if(!audioCtx) return; const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(880, audioCtx.currentTime); g.gain.setValueAtTime(0.001, audioCtx.currentTime); o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.02); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.7); o.stop(audioCtx.currentTime + 0.75); }
+
+    function showInPageNotification(title, body){ // small card
+      const nt = document.createElement('div'); nt.className='toast'; nt.innerHTML = `<strong>${escape(title)}</strong><div style="font-size:13px;margin-top:6px">${escape(body)}</div>`; document.body.appendChild(nt); setTimeout(()=> nt.remove(), 6000); }
+
+    function notifyUser(title, body){ // use Notification API if available
+      if('Notification' in window && Notification.permission === 'granted'){
+        try{ const n = new Notification(title, { body }); n.onclick = ()=> window.focus(); }catch(e){ /* ignore */ }
+      } else {
+        showInPageNotification(title, body);
+      }
+      playBeep(); }
+
+    function scheduleReminder(r){ try{ const eventTs = new Date(r.datetime).getTime(); const now = Date.now(); if(isNaN(eventTs)) return; // schedule -60, -10, 0 only if in future
+      const times = [60*60*1000, 10*60*1000, 0]; times.forEach(offset=>{ const ts = eventTs - offset; const delay = ts - now; if(delay > 0){ const t = setTimeout(()=>{ notifyUser(r.title, offset===0 ? 'الوقت المحدد' : (offset===60*60*1000? 'باقي ساعة' : 'باقي 10 دقائق')); // handle recurring only when main fires
+              if(offset===0 && r.repeat && r.repeat!=='none'){ const next = computeNext(new Date(r.datetime), r.repeat); if(next){ r.datetime = next.toISOString(); saveAll(); renderRems(); scheduleAllReminders(); } }
+            }, delay); timers.push(t); } }); }catch(e){console.error(e);} }
+
+    function computeNext(dt, repeat){ const d = new Date(dt); if(repeat==='daily'){ d.setDate(d.getDate()+1); return d; } if(repeat==='weekly'){ d.setDate(d.getDate()+7); return d; } if(repeat==='monthly'){ d.setMonth(d.getMonth()+1); return d; } return null; }
+
+    function scheduleAllReminders(){ clearTimers(); if('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied'){ Notification.requestPermission(); }
+      reminders.forEach(r=> scheduleReminder(r)); }
+
+    function requestNotificationPermission(){ if(!('Notification' in window)) return Promise.resolve(false); return Notification.requestPermission().then(p=> p==='granted'); }
+
+    /* ======= Init ======= */
+    function uid(){ return Math.random().toString(36).slice(2)+Date.now().toString(36); }
+    renderTasks(); renderRoutines(); renderRems(); scheduleAllReminders(); saveAll();
+
+    // request permission on first load (light prompt)
+    if('Notification' in window && Notification.permission === 'default'){
+      // do not force — show small hint via toast
+      showToast('اطلب إذن الإشعارات من زر الجرس أعلى الشاشة');
+    }
+
+    document.addEventListener("click", () => {
+    const audio = new Audio("notification.mp3");
+    audio.play();
+});
+
+    // keyboard escape to close modals
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ qsa('.modal-backdrop').forEach(m=> m.style.display='none'); fabMenu.classList.add('hidden'); } });
+
+    // persist on unload
+    window.addEventListener('beforeunload', ()=> saveAll());
+
+    // small UX: search tasks
+    qs('#search').addEventListener('input', (e)=>{ const q = e.target.value.toLowerCase().trim(); const filtered = tasks.filter(t=> t.title.toLowerCase().includes(q) || (t.desc||'').toLowerCase().includes(q)); tasksRows.innerHTML=''; filtered.forEach(t=>{ const tr = document.createElement('tr'); tr.innerHTML = `<td>${escape(t.title)}</td><td>${t.start}</td><td>${t.due}</td><td>${t.progress}%</td><td>${t.progress>=100? 'مكتملة' : (new Date(t.due) < new Date() ? 'متأخرة' : 'قيد التنفيذ')}</td><td><button data-id="${t.id}" class="btn edit">تعديل</button><button data-id="${t.id}" class="btn del">حذف</button></td>`; tasksRows.appendChild(tr); }); if(!filtered.length) tasksRows.innerHTML = `<tr><td colspan=6 style="text-align:center;padding:18px;color:var(--muted)">لا توجد نتائج</td></tr>`; });
+
+    // close modals when clicking outside
+    qsa('.modal-backdrop').forEach(m=> m.addEventListener('click', (e)=>{ if(e.target===m) m.style.display='none'; }));
+
+    // small onboarding: focus task add on first use
+    if(!localStorage.getItem(TASKS_KEY) && !localStorage.getItem(ROUTINES_KEY) && !localStorage.getItem(REM_KEY)){
+      setTimeout(()=> openTaskModal(), 800);
+    }
+  </script>
+</body>
+</html>
